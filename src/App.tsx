@@ -8,19 +8,19 @@ interface Video {
   duration: string;
 }
 
-interface VideoCategory {
+interface CategoryVideos {
   categoryId: number;
   categoryTitle: string;
   videos: Video[];
 }
 
 const App = () => {
-  const state = useAsyncState<VideoCategory[]>(async () => {
+  const state = useAsyncState<CategoryVideos[]>(async () => {
     const response = await fetch('http://localhost:8000/api/videos/popular');
     if (!response.ok) {
       throw new Error(`Could not fetch videos from API`);
     }
-    return (await response.json()) as VideoCategory[];
+    return (await response.json()) as CategoryVideos[];
   });
 
   switch (state.status) {
