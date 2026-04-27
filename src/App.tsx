@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useAsyncState } from './useAsyncState.ts';
 
 interface Video {
   id: string;
@@ -14,43 +14,14 @@ interface VideoCategory {
   videos: Video[];
 }
 
-type CategoriesState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success'; data: VideoCategory[] }
-  | { status: 'error'; error: Error };
-
 const App = () => {
-  const [state, setState] = useState<CategoriesState>({ status: 'idle' });
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setState({ status: 'loading' });
-
-      try {
-        const response = await fetch(
-          'http://localhost:8000/api/videos/popular',
-        );
-
-        if (response.ok) {
-          const categories: VideoCategory[] = await response.json();
-          setState({ status: 'success', data: categories });
-        } else {
-          setState({
-            status: 'error',
-            error: new Error(`HTTP error! status: ${response.status}`),
-          });
-        }
-      } catch (error) {
-        setState({
-          status: 'error',
-          error: error instanceof Error ? error : new Error('Unknown error'),
-        });
-      }
-    };
-
-    void fetchCategories();
-  }, []);
+  const state = useAsyncState<VideoCategory[]>(async () => {
+    const response = await fetch('http://localhost:8000/api/videos/popular');
+    if (!response.ok) {
+      throw new Error(`Could not fetch videos from API`);
+    }
+    return (await response.json()) as VideoCategory[];
+  });
 
   switch (state.status) {
     case 'idle':
