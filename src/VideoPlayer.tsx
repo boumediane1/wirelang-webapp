@@ -23,10 +23,13 @@ const VideoPlayer = () => {
 
   const { ref, time, seekTo } = useYouTubePlayer('M7FIvfx5J10');
 
-  const segmentIndex =
-    state.status === 'success'
-      ? state.data.findLastIndex((segment) => time >= segment.start)
-      : -1;
+  const segments = state.status === 'success' ? state.data : [];
+
+  const segmentIndex = segments.findLastIndex(
+    (segment) => time >= segment.start,
+  );
+
+  const currentSegment = segments[segmentIndex];
 
   return (
     <>
@@ -38,35 +41,25 @@ const VideoPlayer = () => {
             style={{ backgroundColor: '#000', width: 640, height: 390 }}
           />
 
-          {state.status === 'success' &&
-            segmentIndex !== -1 &&
-            time <
-              state.data[segmentIndex].start +
-                state.data[segmentIndex].duration && (
-              <p>{state.data[segmentIndex].text}</p>
+          {segmentIndex !== -1 &&
+            time < currentSegment.start + currentSegment.duration && (
+              <p>{currentSegment.text}</p>
             )}
 
           <div className="flex gap-x-4">
             <button
               disabled={segmentIndex <= 0}
               onClick={() => {
-                if (state.status === 'success') {
-                  seekTo(state.data[segmentIndex - 1].start);
-                }
+                seekTo(segments[segmentIndex - 1].start);
               }}
             >
               Previous
             </button>
 
             <button
-              disabled={
-                state.status !== 'success' ||
-                segmentIndex === state.data.length - 1
-              }
+              disabled={segmentIndex === segments.length - 1}
               onClick={() => {
-                if (state.status === 'success') {
-                  seekTo(state.data[segmentIndex + 1].start);
-                }
+                seekTo(segments[segmentIndex + 1].start);
               }}
             >
               Next
@@ -79,18 +72,18 @@ const VideoPlayer = () => {
         {state.status === 'error' && <p>{state.error.message}</p>}
         {state.status === 'success' && (
           <ul>
-            {state.data.map((s) => (
+            {state.data.map((segment) => (
               <li
-                key={s.start}
+                key={segment.start}
                 onClick={() => {
-                  seekTo(s.start);
+                  seekTo(segment.start);
                 }}
               >
                 <div
-                  className={`flex gap-4 ${s.start === state.data[segmentIndex]?.start ? 'bg-red-500' : ''}`}
+                  className={`flex gap-4 ${segment === currentSegment ? 'bg-red-500' : ''}`}
                 >
-                  <div>{s.start}</div>
-                  <div>{s.text}</div>
+                  <div>{segment.start}</div>
+                  <div>{segment.text}</div>
                 </div>
               </li>
             ))}
