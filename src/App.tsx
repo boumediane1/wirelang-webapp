@@ -1,4 +1,5 @@
 import { useAsyncState } from './useAsyncState.ts';
+import { Link } from 'react-router';
 
 interface Video {
   id: string;
@@ -44,15 +45,19 @@ const App = () => {
           ) : (
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {category.videos.map((video) => (
-                <li key={video.id} className="space-y-2">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="aspect-video w-full rounded object-cover"
-                  />
-                  <p className="font-medium">{video.title}</p>
-                  <p className="text-sm text-gray-600">{video.channelTitle}</p>
-                </li>
+                <Link key={video.id} to={`videos/${video.id}`}>
+                  <li className="space-y-2">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="aspect-video w-full rounded object-cover"
+                    />
+                    <p className="font-medium">{video.title}</p>
+                    <p className="text-sm text-gray-600">
+                      {video.channelTitle}
+                    </p>
+                  </li>
+                </Link>
               ))}
             </ul>
           )}
