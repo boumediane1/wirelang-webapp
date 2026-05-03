@@ -5,8 +5,8 @@ export const useYouTubePlayer = (videoId: string) => {
   const [time, setTime] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
-  const seekTo = (seconds: number, allowSeekAhead: boolean) => {
-    return player.current?.seekTo(seconds, allowSeekAhead);
+  const seekTo = (seconds: number) => {
+    return player.current?.seekTo(seconds, true);
   };
 
   useEffect(() => {

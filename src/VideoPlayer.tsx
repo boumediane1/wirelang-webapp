@@ -23,13 +23,10 @@ const VideoPlayer = () => {
 
   const { ref, time, seekTo } = useYouTubePlayer('M7FIvfx5J10');
 
-  const segment =
+  const segmentIndex =
     state.status === 'success'
-      ? state.data.findLast((segment) => {
-          const end = segment.start + segment.duration;
-          return time >= segment.start && time < end;
-        })
-      : undefined;
+      ? state.data.findLastIndex((segment) => time >= segment.start)
+      : -1;
 
   return (
     <>
@@ -41,7 +38,41 @@ const VideoPlayer = () => {
             style={{ backgroundColor: '#000', width: 640, height: 390 }}
           />
 
-          {segment && <p>{segment.text}</p>}
+          {state.status === 'success' &&
+            segmentIndex !== -1 &&
+            time <
+              state.data[segmentIndex].start +
+                state.data[segmentIndex].duration && (
+              <p>{state.data[segmentIndex].text}</p>
+            )}
+
+          <div className="flex gap-x-4">
+            <button
+              disabled={segmentIndex <= 0}
+              onClick={() => {
+                if (state.status === 'success') {
+                  seekTo(state.data[segmentIndex - 1].start);
+                }
+              }}
+            >
+              Previous
+            </button>
+
+            <button
+              disabled={
+                state.status !== 'success' ||
+                segmentIndex === state.data.length - 1
+              }
+              onClick={() => {
+                if (state.status === 'success') {
+                  seekTo(state.data[segmentIndex + 1].start);
+                }
+              }}
+            >
+              Next
+            </button>
+            <button>Auto-pause</button>
+          </div>
         </div>
 
         {state.status === 'loading' && <p>loading…</p>}
@@ -52,11 +83,11 @@ const VideoPlayer = () => {
               <li
                 key={s.start}
                 onClick={() => {
-                  seekTo(s.start, true);
+                  seekTo(s.start);
                 }}
               >
                 <div
-                  className={`flex gap-4 ${s.start === segment?.start ? 'bg-red-500' : ''}`}
+                  className={`flex gap-4 ${s.start === state.data[segmentIndex]?.start ? 'bg-red-500' : ''}`}
                 >
                   <div>{s.start}</div>
                   <div>{s.text}</div>
