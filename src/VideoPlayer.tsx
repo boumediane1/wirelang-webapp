@@ -29,7 +29,9 @@ const VideoPlayer = () => {
     (segment) => time >= segment.start,
   );
 
+  const previousSegment = segments[segmentIndex - 1];
   const currentSegment = segments[segmentIndex];
+  const nextSegment = segments[segmentIndex + 1];
 
   return (
     <>
@@ -41,25 +43,40 @@ const VideoPlayer = () => {
             style={{ backgroundColor: '#000', width: 640, height: 390 }}
           />
 
-          {segmentIndex !== -1 &&
+          {currentSegment &&
             time < currentSegment.start + currentSegment.duration && (
               <p>{currentSegment.text}</p>
             )}
 
           <div className="flex gap-x-4">
             <button
-              disabled={segmentIndex <= 0}
+              disabled={previousSegment === undefined}
               onClick={() => {
-                seekTo(segments[segmentIndex - 1].start);
+                if (previousSegment) {
+                  seekTo(previousSegment.start);
+                }
               }}
             >
               Previous
             </button>
 
             <button
-              disabled={segmentIndex === segments.length - 1}
+              disabled={currentSegment === undefined}
               onClick={() => {
-                seekTo(segments[segmentIndex + 1].start);
+                if (currentSegment) {
+                  seekTo(currentSegment.start);
+                }
+              }}
+            >
+              Repeat
+            </button>
+
+            <button
+              disabled={nextSegment === undefined}
+              onClick={() => {
+                if (nextSegment) {
+                  seekTo(nextSegment.start);
+                }
               }}
             >
               Next
