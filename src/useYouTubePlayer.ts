@@ -9,6 +9,10 @@ export const useYouTubePlayer = (videoId: string) => {
     return player.current?.seekTo(seconds, true);
   };
 
+  const pauseVideo = () => {
+    return player.current?.pauseVideo();
+  };
+
   useEffect(() => {
     const src = 'https://www.youtube.com/iframe_api';
 
@@ -57,5 +61,5 @@ export const useYouTubePlayer = (videoId: string) => {
     };
   }, [videoId]);
 
-  return { ref, time, seekTo };
+  return { ref, time, seekTo, pauseVideo };
 };

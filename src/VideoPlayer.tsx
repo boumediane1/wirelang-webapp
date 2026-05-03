@@ -1,6 +1,7 @@
 import { useAsyncState } from './useAsyncState';
 import { Link } from 'react-router';
 import { useYouTubePlayer } from './useYouTubePlayer';
+import { useEffect, useRef, useState } from 'react';
 
 interface SubtitleSegment {
   duration: number;
@@ -21,7 +22,9 @@ const VideoPlayer = () => {
     return response.json();
   });
 
-  const { ref, time, seekTo } = useYouTubePlayer('M7FIvfx5J10');
+  const { ref, time, seekTo, pauseVideo } = useYouTubePlayer('M7FIvfx5J10');
+
+  const [autoPause, setAutoPause] = useState(false);
 
   const segments = state.status === 'success' ? state.data : [];
 
@@ -32,6 +35,30 @@ const VideoPlayer = () => {
   const previousSegment = segments[segmentIndex - 1];
   const currentSegment = segments[segmentIndex];
   const nextSegment = segments[segmentIndex + 1];
+
+  const lastPausedAtSegmentIndex = useRef<number | null>(null);
+  const lastTime = useRef(0);
+
+  useEffect(() => {
+    if (!autoPause || !currentSegment) return;
+
+    if (time < lastTime.current) {
+      lastPausedAtSegmentIndex.current = null;
+    }
+
+    const end = currentSegment.start + currentSegment.duration;
+
+    // prevent auto-pause after resuming immediately
+    if (lastPausedAtSegmentIndex.current === segmentIndex) {
+      return;
+    }
+
+    if (time >= end) {
+      lastPausedAtSegmentIndex.current = segmentIndex;
+      pauseVideo();
+    }
+    lastTime.current = time;
+  }, [autoPause, time, segmentIndex, currentSegment, pauseVideo]);
 
   return (
     <>
@@ -81,7 +108,7 @@ const VideoPlayer = () => {
             >
               Next
             </button>
-            <button>Auto-pause</button>
+            <button onClick={() => setAutoPause(!autoPause)}>Auto-pause</button>
           </div>
         </div>
 
